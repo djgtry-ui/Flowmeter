@@ -14,8 +14,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                 </svg>
             </div>
-            <h1 class="text-2xl font-bold text-white mb-2">Flowmeter Dashboard</h1>
-            <p class="text-gray-300">Silakan login untuk melanjutkan</p>
+            <h1 class="text-2xl font-bold text-white mb-2">Flowmeter xDashboard</h1>
+            <p class="text-gray-300">Masukkan kredensial untuk memunculkan navigasi</p>
         </div>
 
         <form id="loginForm" class="space-y-6">
@@ -33,9 +33,22 @@
 
             <button type="submit" id="loginBtn"
                     class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors">
-                Sign In
+                Cek Kredensial
             </button>
         </form>
+
+        <div id="navArea" class="hidden mt-6 space-y-3">
+            <div class="p-3 bg-emerald-600/20 border border-emerald-500/50 rounded-lg text-emerald-400 text-center text-sm mb-4">
+                Kredensial Cocok! Silakan beralih:
+            </div>
+            <a href="status_flowmeter.html" 
+               class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-3 shadow-lg border-b-4 border-indigo-800 active:border-b-0 active:translate-y-1">
+                <i class="fas fa-chart-line"></i> MASUK KE DASHBOARD
+            </a>
+            <button onclick="location.reload()" class="w-full text-gray-400 text-xs hover:text-white transition-colors">
+                Ganti Akun / Keluar
+            </button>
+        </div>
 
         <div class="mt-6 text-center text-sm text-gray-400">
             <p>Created By :</p>
@@ -46,54 +59,42 @@
     </div>
 
 <script>
-    // Kredensial yang ditanamkan
-    const VALID_USER = "admin";
-    const VALID_PASS = "123";
+    // Username & Password tertanam
+    const AUTH_USER = "admin";
+    const AUTH_PASS = "123";
 
     document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const messageDiv = document.getElementById('message');
-        const loginBtn = document.getElementById('loginBtn');
+        const userIn = document.getElementById('username').value;
+        const passIn = document.getElementById('password').value;
+        const msg = document.getElementById('message');
+        const form = document.getElementById('loginForm');
+        const nav = document.getElementById('navArea');
 
-        // Reset status tampilan
-        messageDiv.classList.add('hidden');
-        loginBtn.disabled = true;
-        loginBtn.textContent = 'Verifikasi...';
+        if (userIn === AUTH_USER && passIn === AUTH_PASS) {
+            // Jika Cocok: Sembunyikan form, tampilkan tombol navigasi
+            form.classList.add('hidden');
+            msg.classList.add('hidden');
+            nav.classList.remove('hidden');
 
-        // Cek Kredensial Langsung
-        if (username === VALID_USER && password === VALID_PASS) {
-            // Login Berhasil
-            messageDiv.className = 'mt-4 p-3 rounded-lg bg-emerald-600 text-white';
-            messageDiv.textContent = 'Login Berhasil! Mengalihkan...';
-            messageDiv.classList.remove('hidden');
-
-            // Set localStorage agar sistem mengenali user (untuk file lain)
+            // Simpan sesi lokal agar file dashboard bisa terbuka
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('user_data', JSON.stringify({
                 username: "Administrator",
                 akses: { kontrol: 1, history: 1 }
             }));
-
-            // Langsung pindah halaman setelah 500ms agar user sempat melihat pesan sukses
-            setTimeout(() => {
-                window.location.href = 'status_flowmeter.html';
-            }, 500);
-
         } else {
-            // Login Gagal
-            messageDiv.className = 'mt-4 p-3 rounded-lg bg-red-600 text-white';
-            messageDiv.textContent = 'Username atau Password Salah!';
-            messageDiv.classList.remove('hidden');
-            
-            // Reset Tombol dan Password
-            loginBtn.disabled = false;
-            loginBtn.textContent = 'Sign In';
+            // Jika Salah: Tampilkan pesan error
+            msg.className = 'mt-4 p-3 rounded-lg bg-red-600 text-white';
+            msg.textContent = 'Username atau Password tidak terdaftar!';
+            msg.classList.remove('hidden');
             document.getElementById('password').value = '';
         }
     });
 </script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </body>
 </html>
