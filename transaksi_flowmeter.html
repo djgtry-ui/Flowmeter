@@ -26,9 +26,7 @@
 <body class="p-4 md:p-6">
 
     <script>
-        // --- KREDENSIAL DAN SESI TELAH DIHAPUS ---
-        // Halaman kini dapat diakses langsung tanpa pengecekan login/akses
-        
+        // --- BYPASS USER DATA ---
         function logoutUser() {
             localStorage.clear();
             window.location.href = 'index.html';
@@ -51,9 +49,9 @@
                  <span id="conn-text" class="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">API STATUS: CHECKING</span>
                 </div>
     
-                <a href="status_flowmeter.html" class="bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded shadow-lg text-xs font-semibold text-white transition-all italic">🏠 DASHBOARD</a>
-                <a href="history_flowmeter.html" class="bg-slate-600 hover:bg-slate-700 px-5 py-2 rounded shadow-lg text-xs font-semibold text-white transition-all italic">📚 HISTORY</a>
-                <a href="javascript:void(0)" onclick="logoutUser()" class="bg-red-600 hover:bg-red-700 px-5 py-2 rounded shadow-lg text-xs font-semibold text-white transition-all italic">🔓 LOGOUT</a>
+                <a href="status_flowmeter.html" class="bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded shadow-lg text-xs font-semibold text-white transition-all italic uppercase">🏠 Dashboard</a>
+                <a href="history_flowmeter.html" class="bg-slate-600 hover:bg-slate-700 px-5 py-2 rounded shadow-lg text-xs font-semibold text-white transition-all italic uppercase">📚 History</a>
+                <a href="javascript:void(0)" onclick="logoutUser()" class="bg-red-600 hover:bg-red-700 px-5 py-2 rounded shadow-lg text-xs font-semibold text-white transition-all italic uppercase">🔓 Logout</a>
             </div>
         </header>
 
@@ -128,10 +126,19 @@
     let activeMachineID = '1', userSelectedIdx = 1;
     let isUpdating = false;
 
-    // Menghilangkan ketergantungan pada userData dari localStorage
-    const storedUser = JSON.parse(localStorage.getItem('user_data'));
-    const displayUser = storedUser ? storedUser.username : "OPERATOR";
-    document.getElementById('userLabel').innerText = `CP V2.0 | STATUS: ${displayUser}`;
+    // Inisialisasi tanpa UserData
+    window.onload = () => {
+        const storedUser = JSON.parse(localStorage.getItem('user_data'));
+        const displayUser = storedUser ? storedUser.username : "OPERATOR";
+        document.getElementById('userLabel').innerText = `CP V2.0 | STATUS: ${displayUser}`;
+        
+        // Render Mesin
+        const machines = [{id:'1', name:'TH SMT'}, {id:'2', name:'TH P-01'}, {id:'3', name:'TH V-09'}, {id:'4', name:'TH P-05'}, {id:'5', name:'TH WF'}];
+        document.getElementById('machineList').innerHTML = machines.map(m => `<button onclick="changeMachine('${m.id}', this)" class="btn-machine flex-shrink-0 ${m.id === activeMachineID ? 'active' : ''}">${m.name}</button>`).join('');
+        
+        fetchData();
+        checkServerConnection();
+    };
 
     async function fetchData() {
         if (isUpdating) return;
@@ -240,13 +247,8 @@
         fetchData();
     }
 
-    const machines = [{id:'1', name:'TH SMT'}, {id:'2', name:'TH P-01'}, {id:'3', name:'TH V-09'}, {id:'4', name:'TH P-05'}, {id:'5', name:'TH WF'}];
-    document.getElementById('machineList').innerHTML = machines.map(m => `<button onclick="changeMachine('${m.id}', this)" class="btn-machine flex-shrink-0 ${m.id === activeMachineID ? 'active' : ''}">${m.name}</button>`).join('');
-
-    setInterval(fetchData, 1000);
+    setInterval(fetchData, 1500);
     setInterval(checkServerConnection, 10000);
-    fetchData();
-    checkServerConnection();
     </script>
 </body>
 </html>
