@@ -15,7 +15,6 @@
             background: linear-gradient(135deg, #0f172a 0%, #0f2a76 50%, #0f172a 100%);
             margin: 0; color: #d1d5db; min-height: 100vh;
         }
-        /* Dashboard Styles */
         .table-container { max-height: 450px; overflow-y: auto; position: relative; }
         .table-dark { color: #d1d5db; border-collapse: separate; border-spacing: 0; width: 100%; }
         .table-dark thead th { position: sticky; top: 0; background-color: #121212; color: white; padding: 12px 10px; text-align: center; border-bottom: 2px solid var(--color-primary); font-size: 0.70rem; text-transform: uppercase; z-index: 10; }
@@ -39,7 +38,7 @@
             <form onsubmit="handleLogin(event)" class="space-y-5">
                 <div>
                     <label class="block text-[10px] font-bold text-blue-400 mb-2 uppercase">Username</label>
-                    <input type="text" id="userInput" required class="w-full bg-gray-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-all text-sm" placeholder="Email Propan...">
+                    <input type="text" id="userInput" required class="w-full bg-gray-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-all text-sm" placeholder="Email / Username...">
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-blue-400 mb-2 uppercase">Password</label>
@@ -108,32 +107,35 @@
     </div>
 
     <script>
-        // --- DATA USER (DISEMATKAN LANGSUNG) ---
+        // --- DATABASE USER LOKAL (GATEKEEPER ONLY) ---
+        // Anda bisa menambah/mengurangi user di sini tanpa mempengaruhi koneksi API
         const userDatabase = [
             { username: "nurdjaya.atmaja@propanraya.com", password: "Djaya1234", history: 1, kontrol: 1 },
-            { username: "user@propanraya.com", password: "yopie123", history: 1, kontrol: 0 },
             { username: "operator@propanraya.com", password: "propan", history: 1, kontrol: 1 },
             { username: "ie@propanraya.com", password: "ie123", history: 1, kontrol: 0 }
         ];
 
+        // --- KONEKSI API FIX (HARDCODED KREDENSIAL) ---
         const API_URL = 'https://plantopr.propanraya.com/api/flowmeter/result_flowmeter';
         const AUTH_HEADER = 'Basic bnVyZGpheWEuYXRtYWphQHByb3BhbnJheWEuY29tOmllcHJvcGFu';
+        
         let stockChart;
         let updateInterval;
         let idleTime = 0;
-        const maxIdleTime = 10; // Menit
+        const maxIdleTime = 30; // 30 Menit auto logout
 
-        // --- LOGIKA LOGIN ---
+        // --- FUNGSI LOGIN ---
         function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('userInput').value;
             const p = document.getElementById('passInput').value;
 
+            // Cari di database lokal
             const foundUser = userDatabase.find(acc => acc.username === u && acc.password === p);
 
             if (foundUser) {
                 const sessionData = {
-                    username: foundUser.username.split('@')[0], // ambil nama depan saja
+                    username: foundUser.username.split('@')[0], 
                     akses: { history: foundUser.history, kontrol: foundUser.kontrol },
                     loginTime: new Date().getTime()
                 };
@@ -141,7 +143,7 @@
                 localStorage.setItem('user_data', JSON.stringify(sessionData));
                 showDashboard();
             } else {
-                alert("Username atau Password salah!");
+                alert("Akses Ditolak! Username atau Password tidak dikenal.");
             }
         }
 
@@ -153,23 +155,25 @@
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.remove('hidden');
             
-            document.getElementById('welcomeUser').innerText = `USER: ${userData.username} | MONITORING SYSTEM DATA RESULT`;
+            document.getElementById('welcomeUser').innerText = `USER: ${userData.username} | MONITORING SYSTEM`;
             
+            // Atur Visibilitas Tombol Navigasi berdasarkan hak akses lokal
             if(userData.akses.history == 1) document.getElementById('btn-history').classList.remove('hidden');
             if(userData.akses.kontrol == 1) document.getElementById('btn-transaksi').classList.remove('hidden');
 
+            // Mulai ambil data
             updateDashboard();
-            updateInterval = setInterval(updateDashboard, 15000);
+            updateInterval = setInterval(updateDashboard, 10000); // Update tiap 10 detik
             startIdleTimer();
         }
 
         function logoutUser() {
             localStorage.clear();
             clearInterval(updateInterval);
-            location.reload(); // Refresh halaman untuk kembali ke tampilan login
+            location.reload(); 
         }
 
-        // --- LOGIKA DATA API ---
+        // --- AMBIL DATA DARI SERVER PROPAN ---
         async function updateDashboard() {
             try {
                 const machineIds = ['1', '2', '3', '4', '5'];
@@ -180,29 +184,35 @@
                 );
 
                 const results = await Promise.all(fetchPromises);
+                
+                // Extract data dari wrapper API
                 const validData = results
-                    .filter(res => res.status === 'success' && res.data)
-                    .map(res => res.data);
+                    .map(res => {
+                        if (Array.isArray(res)) return res[0];
+                        if (res.data) return res.data;
+                        return res;
+                    })
+                    .filter(item => item && item.id_mesin);
 
                 document.getElementById('totalMachines').innerText = validData.length;
-                document.getElementById('lastUpdate').innerText = `Last Update: ${new Date().toLocaleTimeString('id-ID')} (Every 15s)`;
+                document.getElementById('lastUpdate').innerText = `Last Update: ${new Date().toLocaleTimeString('id-ID')}`;
 
                 renderTable(validData);
                 renderChart(validData);
             } catch (error) {
                 console.error("API Error:", error);
-                document.getElementById('lastUpdate').innerText = "Last Update: Connection Error";
+                document.getElementById('lastUpdate').innerText = "Connection Error";
             }
         }
 
         function renderTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = data.map(item => {
-                const idx = item.Aktif_Outlet || "0";
+                const idx = item.Aktif_Outlet || "1";
                 return `
                     <tr>
                         <td class="opacity-40 font-mono">${item.id_mesin}</td>
-                        <td class="font-bold text-blue-400">${item.Nama_ID}</td>
+                        <td class="font-bold text-blue-400">${item.Nama_ID || ('Mesin '+item.id_mesin)}</td>
                         <td>${item.Nama_Material || '-'}</td>
                         <td class="opacity-60">${item.NoPO || '-'}</td>
                         <td class="stock-yellow font-bold">${formatIndo(item.Stock)}</td>
@@ -219,11 +229,11 @@
             stockChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: data.map(item => [item.Nama_ID, item.Nama_Material || 'N/A']),
+                    labels: data.map(item => item.Nama_ID || item.id_mesin),
                     datasets: [{
                         label: 'Stock (Kg)',
                         data: data.map(item => parseFloat(item.Stock) || 0),
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                        backgroundColor: '#3b82f6',
                         borderRadius: 5
                     }]
                 },
@@ -244,7 +254,8 @@
         }
 
         function updateClock() {
-            document.getElementById('currentTime').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false });
+            const el = document.getElementById('currentTime');
+            if(el) el.innerText = new Date().toLocaleTimeString('id-ID', { hour12: false });
         }
         setInterval(updateClock, 1000);
 
@@ -253,14 +264,11 @@
             window.onmousemove = reset; window.onkeydown = reset; window.onclick = reset;
             setInterval(() => {
                 idleTime++;
-                if (idleTime >= maxIdleTime) {
-                    alert("Sesi berakhir karena tidak ada aktivitas.");
-                    logoutUser();
-                }
+                if (idleTime >= maxIdleTime) { logoutUser(); }
             }, 60000);
         }
 
-        // --- ON LOAD CHECK ---
+        // --- INITIAL CHECK ---
         window.onload = () => {
             if (localStorage.getItem('isLoggedIn') === 'true') {
                 showDashboard();
