@@ -3,278 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring Flowmeter - Propan Raya</title>
+    <title>Flowmeter Dashboard - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    
-    <style>
-        :root { --color-primary: #3b82f6; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #0f2a76 50%, #0f172a 100%);
-            margin: 0; color: #d1d5db; min-height: 100vh;
-        }
-        .table-container { max-height: 450px; overflow-y: auto; position: relative; }
-        .table-dark { color: #d1d5db; border-collapse: separate; border-spacing: 0; width: 100%; }
-        .table-dark thead th { position: sticky; top: 0; background-color: #121212; color: white; padding: 12px 10px; text-align: center; border-bottom: 2px solid var(--color-primary); font-size: 0.70rem; text-transform: uppercase; z-index: 10; }
-        .table-dark td { border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 10px; font-size: 0.75rem; white-space: nowrap; text-align: center; }
-        .table-dark tbody tr:hover { background-color: rgba(59, 130, 246, 0.1); transition: 0.2s; }
-        .stock-yellow { color: #fbbf24; }
-        .text-active-green { color: #10b981; }
-        .hidden { display: none !important; }
-    </style>
 </head>
-
-<body class="p-4 md:p-8">
-
-    <div id="login-section" class="flex items-center justify-center min-h-[85vh]">
-        <div class="bg-gray-900/90 p-8 rounded-2xl border border-white/10 shadow-2xl w-full max-w-md">
-            <div class="text-center mb-8">
-                <i class="fa-solid fa-gauge-high text-blue-500 text-5xl mb-4"></i>
-                <h2 class="text-2xl font-bold text-white uppercase tracking-tighter">Flowmeter Login</h2>
-                <p class="text-gray-400 text-[10px] uppercase tracking-widest opacity-60">Internal Monitoring System</p>
-            </div>
-            <form onsubmit="handleLogin(event)" class="space-y-5">
-                <div>
-                    <label class="block text-[10px] font-bold text-blue-400 mb-2 uppercase">Username</label>
-                    <input type="text" id="userInput" required class="w-full bg-gray-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-all text-sm" placeholder="Email / Username...">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-blue-400 mb-2 uppercase">Password</label>
-                    <input type="password" id="passInput" required class="w-full bg-gray-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-all text-sm" placeholder="••••••••">
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-lg shadow-xl transition-all text-xs tracking-widest uppercase">
-                    Masuk Sistem
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <div id="dashboard-section" class="container mx-auto hidden">
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 min-h-screen flex items-center justify-center">
+    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 w-full max-w-md border border-white/20">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-white mb-2">Realtime Status Flowmeter</h1>
-            <div id="currentTime" class="text-white text-lg font-mono mb-1">00:00:00</div>
-            <p id="welcomeUser" class="text-blue-300 opacity-80 uppercase tracking-widest text-[10px]">Loading User...</p>
-            <p id="lastUpdate" class="text-emerald-400 text-[9px] mt-2 italic">Waiting for data...</p>
+            <div class="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-white mb-2">Flowmeter Dashboard</h1>
+            <p class="text-gray-300">Silakan login untuk melanjutkan</p>
         </div>
 
-        <div class="flex justify-end mb-6 space-x-3">
-            <a id="btn-transaksi" href="transaksi_flowmeter.html" class="hidden bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded shadow-lg text-xs font-semibold text-white transition-all italic">🏠 TRANSAKSI</a>
-            <a id="btn-history" href="history_flowmeter.html" class="hidden bg-slate-600 hover:bg-slate-700 px-5 py-2 rounded shadow-lg text-xs font-semibold text-white transition-all italic">📚 HISTORY</a>
-            <button onclick="logoutUser()" class="bg-red-600 hover:bg-red-700 px-5 py-2 rounded shadow-lg text-xs font-semibold text-white transition-all italic uppercase">🔓 Logout</button>
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                <input type="text" id="username" name="username" required
+                        class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                <input type="password" id="password" name="password" required
+                        class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors">
+            </div>
+
+            <button type="submit" id="loginBtn"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors">
+                Sign In
+            </button>
+        </form>
+
+        <div id="navContainer" class="hidden mt-6">
+            <a href="status_flowmeter.html" 
+               class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2">
+                <span>GO TO DASHBOARD</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            </a>
         </div>
 
-        <div class="bg-gray-900/90 rounded-xl border border-white/10 shadow-2xl p-5 mb-8">
-            <div class="flex items-center justify-between mb-6 border-b border-blue-500/30 pb-3">
-                <h2 class="text-white font-semibold text-sm flex items-center uppercase italic">
-                    <i class="fa-solid fa-chart-column mr-3 text-blue-400"></i>
-                    Grafik Stock & Material ( <span id="totalMachines">0 </span>_Aktif)
-                </h2>
-            </div>
-            <div class="h-80 w-full">
-                <canvas id="stockChart"></canvas>
-            </div>
+        <div class="mt-6 text-center text-sm text-gray-400">
+            <p>Created By :</p>
+            <p>Nur Djaya Atmaja</p>
         </div>
 
-        <div class="bg-gray-900/90 rounded-xl border border-white/10 shadow-2xl overflow-hidden">
-            <div class="p-4 bg-gray-800/50 border-b border-blue-500/30">
-                <h2 class="text-white font-semibold flex items-center text-xs uppercase italic">
-                    <i class="fa-solid fa-table-list mr-3 text-blue-400"></i>
-                    Tabel Monitoring Result
-                </h2>
-            </div>
-            <div class="table-container">
-                <table class="table-dark">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;">ID</th>
-                            <th>Nama Mesin</th>
-                            <th>Material</th>
-                            <th>No PO</th>
-                            <th class="stock-yellow">Stock (Kg)</th>
-                            <th>Output Outlet</th>
-                            <th class="text-active-green">Target (Kg)</th>
-                            <th class="text-active-green">Aktual (Kg)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="8" class="py-20 opacity-50 italic text-center">Menghubungkan ke API...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <div id="message" class="mt-4 p-3 rounded-lg hidden text-center text-sm font-semibold"></div>
     </div>
 
-    <script>
-        // --- DATABASE USER LOKAL (GATEKEEPER ONLY) ---
-        // Anda bisa menambah/mengurangi user di sini tanpa mempengaruhi koneksi API
-        const userDatabase = [
-            { username: "nurdjaya.atmaja@propanraya.com", password: "Djaya1234", history: 1, kontrol: 1 },
-            { username: "operator@propanraya.com", password: "propan", history: 1, kontrol: 1 },
-            { username: "ie@propanraya.com", password: "ie123", history: 1, kontrol: 0 }
-        ];
+<script>
+    // Kredensial yang ditanamkan
+    const VALID_USER = "admin";
+    const VALID_PASS = "123";
 
-        // --- KONEKSI API FIX (HARDCODED KREDENSIAL) ---
-        const API_URL = 'https://plantopr.propanraya.com/api/flowmeter/result_flowmeter';
-        const AUTH_HEADER = 'Basic bnVyZGpheWEuYXRtYWphQHByb3BhbnJheWEuY29tOmllcHJvcGFu';
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        let stockChart;
-        let updateInterval;
-        let idleTime = 0;
-        const maxIdleTime = 30; // 30 Menit auto logout
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const messageDiv = document.getElementById('message');
+        const navContainer = document.getElementById('navContainer');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginForm = document.getElementById('loginForm');
 
-        // --- FUNGSI LOGIN ---
-        function handleLogin(e) {
-            e.preventDefault();
-            const u = document.getElementById('userInput').value;
-            const p = document.getElementById('passInput').value;
+        messageDiv.classList.add('hidden');
+        navContainer.classList.add('hidden');
 
-            // Cari di database lokal
-            const foundUser = userDatabase.find(acc => acc.username === u && acc.password === p);
-
-            if (foundUser) {
-                const sessionData = {
-                    username: foundUser.username.split('@')[0], 
-                    akses: { history: foundUser.history, kontrol: foundUser.kontrol },
-                    loginTime: new Date().getTime()
-                };
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('user_data', JSON.stringify(sessionData));
-                showDashboard();
-            } else {
-                alert("Akses Ditolak! Username atau Password tidak dikenal.");
-            }
-        }
-
-        // --- TAMPILAN DASHBOARD ---
-        function showDashboard() {
-            const userData = JSON.parse(localStorage.getItem('user_data'));
-            if (!userData) return;
-
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('dashboard-section').classList.remove('hidden');
+        // Cek Kredensial Langsung
+        if (username === VALID_USER && password === VALID_PASS) {
+            // Login Berhasil
+            messageDiv.className = 'mt-4 p-3 rounded-lg bg-emerald-600 text-white';
+            messageDiv.textContent = 'Verifikasi Berhasil!';
+            messageDiv.classList.remove('hidden');
             
-            document.getElementById('welcomeUser').innerText = `USER: ${userData.username} | MONITORING SYSTEM`;
+            // Sembunyikan Form Login, Tampilkan Tombol Navigasi
+            loginForm.classList.add('hidden');
+            navContainer.classList.remove('hidden');
+
+            // Simpan sesi lokal agar file lain tetap bisa berjalan
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('user_data', JSON.stringify({
+                username: "Administrator",
+                akses: { kontrol: 1, history: 1 }
+            }));
+        } else {
+            // Login Gagal
+            messageDiv.className = 'mt-4 p-3 rounded-lg bg-red-600 text-white';
+            messageDiv.textContent = 'Username atau Password Salah!';
+            messageDiv.classList.remove('hidden');
             
-            // Atur Visibilitas Tombol Navigasi berdasarkan hak akses lokal
-            if(userData.akses.history == 1) document.getElementById('btn-history').classList.remove('hidden');
-            if(userData.akses.kontrol == 1) document.getElementById('btn-transaksi').classList.remove('hidden');
-
-            // Mulai ambil data
-            updateDashboard();
-            updateInterval = setInterval(updateDashboard, 10000); // Update tiap 10 detik
-            startIdleTimer();
+            // Reset input password
+            document.getElementById('password').value = '';
         }
-
-        function logoutUser() {
-            localStorage.clear();
-            clearInterval(updateInterval);
-            location.reload(); 
-        }
-
-        // --- AMBIL DATA DARI SERVER PROPAN ---
-        async function updateDashboard() {
-            try {
-                const machineIds = ['1', '2', '3', '4', '5'];
-                const fetchPromises = machineIds.map(id => 
-                    fetch(`${API_URL}?id_mesin=${id}`, {
-                        headers: { 'Authorization': AUTH_HEADER }
-                    }).then(res => res.json())
-                );
-
-                const results = await Promise.all(fetchPromises);
-                
-                // Extract data dari wrapper API
-                const validData = results
-                    .map(res => {
-                        if (Array.isArray(res)) return res[0];
-                        if (res.data) return res.data;
-                        return res;
-                    })
-                    .filter(item => item && item.id_mesin);
-
-                document.getElementById('totalMachines').innerText = validData.length;
-                document.getElementById('lastUpdate').innerText = `Last Update: ${new Date().toLocaleTimeString('id-ID')}`;
-
-                renderTable(validData);
-                renderChart(validData);
-            } catch (error) {
-                console.error("API Error:", error);
-                document.getElementById('lastUpdate').innerText = "Connection Error";
-            }
-        }
-
-        function renderTable(data) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = data.map(item => {
-                const idx = item.Aktif_Outlet || "1";
-                return `
-                    <tr>
-                        <td class="opacity-40 font-mono">${item.id_mesin}</td>
-                        <td class="font-bold text-blue-400">${item.Nama_ID || ('Mesin '+item.id_mesin)}</td>
-                        <td>${item.Nama_Material || '-'}</td>
-                        <td class="opacity-60">${item.NoPO || '-'}</td>
-                        <td class="stock-yellow font-bold">${formatIndo(item.Stock)}</td>
-                        <td class="text-indigo-300 italic font-semibold">${item[`Outlet_${idx}_Nama`] || "-"}</td>
-                        <td class="text-active-green font-bold">${formatIndo(item[`Outlet_${idx}_Target`])}</td>
-                        <td class="text-active-green font-bold">${formatIndo(item.Aktual)}</td>
-                    </tr>`;
-            }).join('');
-        }
-
-        function renderChart(data) {
-            const ctx = document.getElementById('stockChart').getContext('2d');
-            if (stockChart) stockChart.destroy();
-            stockChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: data.map(item => item.Nama_ID || item.id_mesin),
-                    datasets: [{
-                        label: 'Stock (Kg)',
-                        data: data.map(item => parseFloat(item.Stock) || 0),
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 5
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        x: { ticks: { color: '#ffffff', font: { size: 10 } } }
-                    }
-                }
-            });
-        }
-
-        // --- UTILS ---
-        function formatIndo(val) {
-            return (parseFloat(val) || 0).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        function updateClock() {
-            const el = document.getElementById('currentTime');
-            if(el) el.innerText = new Date().toLocaleTimeString('id-ID', { hour12: false });
-        }
-        setInterval(updateClock, 1000);
-
-        function startIdleTimer() {
-            const reset = () => idleTime = 0;
-            window.onmousemove = reset; window.onkeydown = reset; window.onclick = reset;
-            setInterval(() => {
-                idleTime++;
-                if (idleTime >= maxIdleTime) { logoutUser(); }
-            }, 60000);
-        }
-
-        // --- INITIAL CHECK ---
-        window.onload = () => {
-            if (localStorage.getItem('isLoggedIn') === 'true') {
-                showDashboard();
-            }
-            updateClock();
-        };
-    </script>
+    });
+</script>
 </body>
 </html>
