@@ -43,10 +43,15 @@
 <body class="p-4 md:p-8">
 
     <script>
-        
+        // 1. PENGGANTI USER DATA (Langsung Bypass)
+        const USER_BYPASS = {
+            username: "Operator",
+            akses: { download: 1 } // Memberikan akses download otomatis
+        };
+
         // 2. FITUR AUTO LOGOUT (IDLE 10 MENIT)
         let idleTime = 0;
-        const maxIdleTime = 1; 
+        const maxIdleTime = 10; 
         function resetTimer() { idleTime = 0; }
         window.onload = resetTimer;
         window.onmousemove = resetTimer;
@@ -76,7 +81,7 @@
                     <i class="fa-solid fa-clock-rotate-left text-blue-500"></i>
                     Riwayat <span class="text-blue-500">Transfer</span>
                 </h1>
-                <p class="text-slate-500 text-[10px] font-bold mt-1 uppercase tracking-widest">Operator: <span id="op-name" class="text-blue-400">---</span></p>
+                <p class="text-slate-500 text-[10px] font-bold mt-1 uppercase tracking-widest">Operator: <span id="op-name" class="text-blue-400">OPERATOR</span></p>
             </div>
             <div class="flex gap-2">
                 <a href="status_flowmeter.html" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded shadow-lg text-xs font-bold text-white transition-all italic uppercase">🏠 Dashboard</a>
@@ -166,7 +171,6 @@
         const rowsPerPage = 50;
 
         window.onload = () => {
-            if(userData) document.getElementById('op-name').innerText = userData.username;
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             document.getElementById('endDate').value = today;
@@ -189,7 +193,6 @@
             info.innerText = "⏳ PROCESSING DATA...";
             tbody.innerHTML = '<tr><td colspan="11" class="p-20 text-center"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-500"></i><br><span class="uppercase tracking-widest text-[10px] font-bold">Mengambil Data dari Server...</span></td></tr>';
 
-            // Build URL sesuai contoh PHP
             let finalUrl = `${BASE_API_URL}?tanggal_mulai=${start}&tanggal_akhir=${end}`;
             if(fm) finalUrl += `&id_mesin=${fm}`;
 
@@ -203,11 +206,8 @@
                 });
                 const result = await response.json();
                 
-                // Menangani response Propan (biasanya langsung array atau {data: []})
                 const dataArray = Array.isArray(result) ? result : (result.data || []);
-                
                 allRawData = dataArray;
-                // Urutkan berdasarkan ID terbaru
                 allRawData.sort((a, b) => parseInt(b.log_id || 0) - parseInt(a.log_id || 0));
                 
                 currentPage = 1;
@@ -225,14 +225,12 @@
             const seen = new Set();
             
             return allRawData.filter(item => {
-                // Kunci Unik agar tidak dobel: Gabungan Mesin + PO + Target + Aktual + Keterangan
                 const uniqueKey = `${item.id_mesin}-${item.NoPO}-${item.Target}-${item.Aktual}-${item.keterangan}`;
                 const searchStr = `${item.NoPO} ${item.NoPBI} ${item.Nama_Material} ${item.Nama_ID} ${item.keterangan}`.toLowerCase();
                 
                 if (seen.has(uniqueKey) || !searchStr.includes(search)) {
                     return false; 
                 }
-                
                 seen.add(uniqueKey);
                 return true;
             });
@@ -241,7 +239,6 @@
         function renderTable() {
             const tbody = document.getElementById('tableBody');
             const filtered = getFilteredUniqueData();
-
             const startIdx = (currentPage - 1) * rowsPerPage;
             const pageData = filtered.slice(startIdx, startIdx + rowsPerPage);
             
@@ -284,15 +281,10 @@
         }
 
         function downloadExcel() {
-            // CEK AKSES DOWNLOAD
-            if (userData.akses.download != 1 && userData.akses.download != "1") {
-                alert("Maaf, Anda tidak memiliki izin untuk mendownload data Excel.");
-                return;
-            }
-
+            // Memberikan akses download langsung tanpa cek userData
             const dataToDownload = getFilteredUniqueData();
             if (dataToDownload.length === 0) {
-                alert("Tidak ada data untuk diunduh.");
+                alert("Tidak ada data untuk diunduh. Silakan klik SYNC terlebih dahulu.");
                 return;
             }
 
