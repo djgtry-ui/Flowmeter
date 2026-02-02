@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Flowmeter - Monitoring Propan</title>
+    <title>Monitoring System - Propan Raya</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
@@ -13,171 +13,184 @@
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #0f2a76 50%, #0f172a 100%);
-            margin: 0;
-            color: #d1d5db;
-            min-height: 100vh;
+            margin: 0; color: #d1d5db; min-height: 100vh;
         }
-        .table-container { max-height: 450px; overflow-y: auto; position: relative; }
-        .table-dark { color: #d1d5db; border-collapse: separate; border-spacing: 0; width: 100%; }
-        .table-dark thead th { position: sticky; top: 0; background-color: #121212; color: white; padding: 12px 10px; text-align: center; border-bottom: 2px solid var(--color-primary); font-size: 0.70rem; text-transform: uppercase; z-index: 10; }
-        .table-dark td { border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 10px; font-size: 0.75rem; white-space: nowrap; text-align: center; }
-        .table-dark tbody tr:hover { background-color: rgba(59, 130, 246, 0.1); transition: 0.2s; }
+        /* Dashboard Styles */
+        .table-container { max-height: 450px; overflow-y: auto; }
+        .table-dark { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .table-dark thead th { position: sticky; top: 0; background-color: #121212; color: white; padding: 12px; border-bottom: 2px solid var(--color-primary); font-size: 0.70rem; z-index: 10; }
+        .table-dark td { border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; font-size: 0.75rem; text-align: center; }
         .stock-yellow { color: #fbbf24; }
         .text-active-green { color: #10b981; }
+        .hidden { display: none !important; }
     </style>
 </head>
 
 <body class="p-4 md:p-8">
 
-    <div class="container mx-auto">
+    <div id="login-section" class="flex items-center justify-center min-h-[80vh]">
+        <div class="bg-gray-900/80 p-8 rounded-2xl border border-white/10 shadow-2xl w-full max-w-md">
+            <div class="text-center mb-8">
+                <i class="fa-solid fa-droplet text-blue-500 text-5xl mb-4"></i>
+                <h2 class="text-2xl font-bold text-white">Flowmeter Login</h2>
+                <p class="text-gray-400 text-sm">Masukkan kredensial Anda</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-semibold text-blue-400 mb-2">USERNAME / EMAIL</label>
+                    <input type="text" id="username" required class="w-full bg-gray-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-blue-400 mb-2">PASSWORD</label>
+                    <input type="password" id="password" required class="w-full bg-gray-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-all">
+                </div>
+                <button type="submit" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg transition-all flex justify-center items-center">
+                    <span>MASUK SISTEM</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboard-section" class="container mx-auto hidden">
         <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-white mb-2">Realtime Status Flowmeter</h1>
             <div id="currentTime" class="text-white text-lg font-mono mb-1">00:00:00</div>
-            <p id="welcomeUser" class="text-blue-300 opacity-80 uppercase tracking-widest text-[10px]">MONITORING SYSTEM DATA RESULT</p>
-            <p id="lastUpdate" class="text-emerald-400 text-[9px] mt-2 italic">Last Update: Waiting for data...</p>
+            <p id="welcomeUser" class="text-blue-300 opacity-80 uppercase tracking-widest text-[10px]">Loading...</p>
+            <p id="lastUpdate" class="text-emerald-400 text-[9px] mt-2 italic">Waiting for data...</p>
         </div>
 
         <div class="flex justify-end mb-6 space-x-3">
-            <a id="btn-transaksi" href="transaksi_flowmeter.html" class="bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded shadow-lg text-xs font-semibold text-white transition-all italic">🏠 TRANSAKSI</a>
-            <a id="btn-history" href="history_flowmeter.html" class="bg-slate-600 hover:bg-slate-700 px-5 py-2 rounded shadow-lg text-xs font-semibold text-white transition-all italic">📚 HISTORY</a>
+            <a id="btn-transaksi" href="#" class="hidden bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded text-xs font-semibold text-white italic">🏠 TRANSAKSI</a>
+            <a id="btn-history" href="#" class="hidden bg-slate-600 hover:bg-slate-700 px-5 py-2 rounded text-xs font-semibold text-white italic">📚 HISTORY</a>
+            <button onclick="logoutUser()" class="bg-red-600 hover:bg-red-700 px-5 py-2 rounded text-xs font-semibold text-white italic">🔓 LOGOUT</button>
         </div>
 
         <div class="bg-gray-900/90 rounded-xl border border-white/10 shadow-2xl p-5 mb-8">
-            <div class="flex items-center justify-between mb-6 border-b border-blue-500/30 pb-3">
-                <h2 class="text-white font-semibold text-sm flex items-center uppercase italic">
-                    <i class="fa-solid fa-chart-column mr-3 text-blue-400"></i>
-                    Grafik Stock & Material ( <span id="totalMachines">0 </span>_Aktif)
-                </h2>
-            </div>
-            <div class="h-80 w-full">
-                <canvas id="stockChart"></canvas>
-            </div>
+            <h2 class="text-white font-semibold text-sm mb-6 flex items-center italic uppercase">
+                <i class="fa-solid fa-chart-column mr-3 text-blue-400"></i>
+                Grafik Stock & Material (<span id="totalMachines">0</span> Aktif)
+            </h2>
+            <div class="h-80 w-full"><canvas id="stockChart"></canvas></div>
         </div>
 
         <div class="bg-gray-900/90 rounded-xl border border-white/10 shadow-2xl overflow-hidden">
-            <div class="p-4 bg-gray-800/50 border-b border-blue-500/30">
-                <h2 class="text-white font-semibold flex items-center text-xs uppercase italic">
-                    <i class="fa-solid fa-table-list mr-3 text-blue-400"></i>
-                    Tabel Monitoring Result
-                </h2>
-            </div>
             <div class="table-container">
                 <table class="table-dark">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">ID</th>
-                            <th>Nama Mesin</th>
-                            <th>Material</th>
-                            <th>No PO</th>
-                            <th class="stock-yellow">Stock (Kg)</th>
-                            <th>Output Outlet</th>
-                            <th class="text-active-green">Target (Kg)</th>
-                            <th class="text-active-green">Aktual (Kg)</th>
+                            <th>ID</th><th>Nama Mesin</th><th>Material</th><th>No PO</th>
+                            <th class="stock-yellow">Stock (Kg)</th><th>Outlet</th>
+                            <th class="text-active-green">Target</th><th class="text-active-green">Aktual</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="8" class="py-20 opacity-50 italic text-center">Menghubungkan ke API...</td></tr>
-                    </tbody>
+                    <tbody id="tableBody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('currentTime').innerText = now.toLocaleTimeString('id-ID', { hour12: false });
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        const API_URL = 'https://plantopr.propanraya.com/api/flowmeter/result_flowmeter';
+        const API_RESULT = 'https://plantopr.propanraya.com/api/flowmeter/result_flowmeter';
         const AUTH_HEADER = 'Basic bnVyZGpheWEuYXRtYWphQHByb3BhbnJheWEuY29tOmllcHJvcGFu';
         let stockChart;
+        let updateInterval;
 
-        function formatIndo(val) {
-            return (parseFloat(val) || 0).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        // --- LOGIKA LOGIN ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnLogin');
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
+            
+            // Simulasi Login (Hubungkan ke API Login Propan Anda jika ada)
+            // Di sini kita langsung bypass ke dashboard demi contoh:
+            const userData = {
+                username: document.getElementById('username').value,
+                akses: { history: 1, kontrol: 1 }
+            };
+            
+            localStorage.setItem('userData', JSON.stringify(userData));
+            initDashboard();
         }
 
+        function initDashboard() {
+            const sessionData = localStorage.getItem('userData');
+            if (!sessionData) return;
+
+            const user = JSON.parse(sessionData);
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+            document.getElementById('welcomeUser').innerText = `USER: ${user.username} | MONITORING SYSTEM`;
+
+            if(user.akses.history == 1) document.getElementById('btn-history').classList.remove('hidden');
+            if(user.akses.kontrol == 1) document.getElementById('btn-transaksi').classList.remove('hidden');
+
+            updateDashboard();
+            updateInterval = setInterval(updateDashboard, 15000);
+        }
+
+        // --- LOGIKA DASHBOARD ---
         async function updateDashboard() {
             try {
-                const machineIds = ['1', '2', '3', '4', '5'];
-                const fetchPromises = machineIds.map(id => 
-                    fetch(`${API_URL}?id_mesin=${id}`, {
-                        headers: { 'Authorization': AUTH_HEADER }
-                    }).then(res => res.json())
-                );
-
-                const results = await Promise.all(fetchPromises);
-                // Menyesuaikan dengan struktur response API Propan
-                const validData = results
-                    .filter(res => res && (res.status === 'success' || res.data))
-                    .map(res => res.data || res);
+                const ids = ['1', '2', '3', '4', '5'];
+                const fetches = ids.map(id => fetch(`${API_RESULT}?id_mesin=${id}`, { headers: { 'Authorization': AUTH_HEADER } }).then(r => r.json()));
+                const results = await Promise.all(fetches);
+                const validData = results.filter(r => r.status === 'success' && r.data).map(r => r.data);
 
                 document.getElementById('totalMachines').innerText = validData.length;
-                document.getElementById('lastUpdate').innerText = `Last Update: ${new Date().toLocaleTimeString('id-ID')} (Every 15s)`;
-
+                document.getElementById('lastUpdate').innerText = `Last Update: ${new Date().toLocaleTimeString('id-ID')}`;
+                
                 renderTable(validData);
                 renderChart(validData);
-            } catch (error) {
-                console.error("Error Fetching API:", error);
-                document.getElementById('lastUpdate').innerText = "Last Update: Connection Error";
-            }
+            } catch (e) { console.error(e); }
         }
 
         function renderTable(data) {
-            const tbody = document.getElementById('tableBody');
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="py-20 opacity-50 italic text-center">Tidak ada data tersedia</td></tr>';
-                return;
-            }
-            tbody.innerHTML = data.map(item => {
+            document.getElementById('tableBody').innerHTML = data.map(item => {
                 const idx = item.Aktif_Outlet || "0";
-                return `
-                    <tr>
-                        <td class="opacity-40 font-mono">${item.id_mesin || '-'}</td>
-                        <td class="font-bold text-blue-400">${item.Nama_ID || '-'}</td>
-                        <td>${item.Nama_Material || '-'}</td>
-                        <td class="opacity-60">${item.NoPO || '-'}</td>
-                        <td class="stock-yellow font-bold">${formatIndo(item.Stock)}</td>
-                        <td class="text-indigo-300 italic font-semibold">${item[`Outlet_${idx}_Nama`] || "-"}</td>
-                        <td class="text-active-green font-bold">${formatIndo(item[`Outlet_${idx}_Target`])}</td>
-                        <td class="text-active-green font-bold">${formatIndo(item.Aktual)}</td>
-                    </tr>`;
+                return `<tr>
+                    <td class="opacity-40">${item.id_mesin}</td>
+                    <td class="font-bold text-blue-400">${item.Nama_ID}</td>
+                    <td>${item.Nama_Material || '-'}</td>
+                    <td>${item.NoPO || '-'}</td>
+                    <td class="stock-yellow font-bold">${(parseFloat(item.Stock)||0).toLocaleString('id-ID')}</td>
+                    <td class="text-indigo-300 italic">${item[`Outlet_${idx}_Nama`] || "-"}</td>
+                    <td class="text-active-green font-bold">${(parseFloat(item[`Outlet_${idx}_Target`])||0).toLocaleString('id-ID')}</td>
+                    <td class="text-active-green font-bold">${(parseFloat(item.Aktual)||0).toLocaleString('id-ID')}</td>
+                </tr>`;
             }).join('');
         }
 
         function renderChart(data) {
-            const canvas = document.getElementById('stockChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
+            const ctx = document.getElementById('stockChart').getContext('2d');
             if (stockChart) stockChart.destroy();
             stockChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: data.map(item => [item.Nama_ID || 'ID:'+item.id_mesin, item.Nama_Material || 'N/A']),
+                    labels: data.map(item => item.Nama_ID),
                     datasets: [{
                         label: 'Stock (Kg)',
                         data: data.map(item => parseFloat(item.Stock) || 0),
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
-                        borderRadius: 5
+                        backgroundColor: '#3b82f6', borderRadius: 5
                     }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } },
-                        x: { ticks: { color: '#ffffff', font: { size: 10 } } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
-        // Jalankan otomatis tanpa syarat login
-        updateDashboard();
-        setInterval(updateDashboard, 15000);
+        function logoutUser() {
+            localStorage.clear();
+            clearInterval(updateInterval);
+            location.reload();
+        }
+
+        function updateClock() {
+            document.getElementById('currentTime').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Cek sesi saat load pertama kali
+        if (localStorage.getItem('userData')) initDashboard();
     </script>
 </body>
 </html>
