@@ -37,14 +37,6 @@
             </button>
         </form>
 
-        <div id="navContainer" class="hidden mt-6">
-            <a href="status_flowmeter.html" 
-               class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2">
-                <span>GO TO DASHBOARD</span>
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-            </a>
-        </div>
-
         <div class="mt-6 text-center text-sm text-gray-400">
             <p>Created By :</p>
             <p>Nur Djaya Atmaja</p>
@@ -64,37 +56,41 @@
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const messageDiv = document.getElementById('message');
-        const navContainer = document.getElementById('navContainer');
         const loginBtn = document.getElementById('loginBtn');
-        const loginForm = document.getElementById('loginForm');
 
+        // Reset status tampilan
         messageDiv.classList.add('hidden');
-        navContainer.classList.add('hidden');
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Verifikasi...';
 
         // Cek Kredensial Langsung
         if (username === VALID_USER && password === VALID_PASS) {
             // Login Berhasil
             messageDiv.className = 'mt-4 p-3 rounded-lg bg-emerald-600 text-white';
-            messageDiv.textContent = 'Verifikasi Berhasil!';
+            messageDiv.textContent = 'Login Berhasil! Mengalihkan...';
             messageDiv.classList.remove('hidden');
-            
-            // Sembunyikan Form Login, Tampilkan Tombol Navigasi
-            loginForm.classList.add('hidden');
-            navContainer.classList.remove('hidden');
 
-            // Simpan sesi lokal agar file lain tetap bisa berjalan
+            // Set localStorage agar sistem mengenali user (untuk file lain)
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('user_data', JSON.stringify({
                 username: "Administrator",
                 akses: { kontrol: 1, history: 1 }
             }));
+
+            // Langsung pindah halaman setelah 500ms agar user sempat melihat pesan sukses
+            setTimeout(() => {
+                window.location.href = 'status_flowmeter.html';
+            }, 500);
+
         } else {
             // Login Gagal
             messageDiv.className = 'mt-4 p-3 rounded-lg bg-red-600 text-white';
             messageDiv.textContent = 'Username atau Password Salah!';
             messageDiv.classList.remove('hidden');
             
-            // Reset input password
+            // Reset Tombol dan Password
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Sign In';
             document.getElementById('password').value = '';
         }
     });
