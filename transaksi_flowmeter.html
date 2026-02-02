@@ -26,9 +26,17 @@
 <body class="p-4 md:p-6">
 
     <script>
-       
+        // --- PROTEKSI AKSES: CEK LOGIN TERLEBIH DAHULU ---
+        const sessionData = localStorage.getItem('userData');
+        if (!sessionData) {
+            alert("Sesi tidak ditemukan. Silahkan login.");
+            window.location.href = 'index.html';
+        }
+        const userData = JSON.parse(sessionData);
+
+        // --- FITUR AUTO LOGOUT (IDLE TIMEOUT) ---
         let idleTime = 0;
-        const maxIdleTime = 1;
+        const maxIdleTime = 5; // Batas 5 menit idle
         function resetTimer() { idleTime = 0; }
         window.onmousemove = resetTimer;
         window.onkeydown = resetTimer;
@@ -37,8 +45,7 @@
         setInterval(function() {
             idleTime++;
             if (idleTime >= maxIdleTime) {
-                localStorage.clear();
-                window.location.href = 'index.html';
+                logoutUser();
             }
         }, 60000);
 
@@ -141,10 +148,11 @@
     let activeMachineID = '1', userSelectedIdx = 1;
     let isUpdating = false;
 
+    // Inisialisasi User Label
     if(userData) document.getElementById('userLabel').innerText = `CP V2.0 | OPERATOR: ${userData.username}`;
 
     async function fetchData() {
-        if (isUpdating) return;
+        if (!userData || isUpdating) return; // Hentikan jika tidak ada user atau sedang upload
         try {
             const res = await fetch(`${API_GET}?id_mesin=${activeMachineID}`, {
                 method: 'GET',
@@ -159,9 +167,7 @@
     }
 
     function formatDot(val) {
-        let num = parseFloat(val) || 0;
-        // Menggunakan toFixed(2) menjamin pemisah desimal adalah titik (.)
-        return num.toFixed(2); 
+        return (parseFloat(val) || 0).toFixed(2); 
     }
 
     function renderUI(data) {
@@ -172,8 +178,6 @@
         if(activeEl !== 'd-pbi') document.getElementById('d-pbi').value = data.NoPBI || "";
         if(activeEl !== 'd-material') document.getElementById('d-material').value = data.Nama_Material || "";
         if(activeEl !== 'd-pic') document.getElementById('d-pic').value = data.PIC || "";
-        
-        // FIX: Tampilan Stock pakai titik
         if(activeEl !== 'd-stock') document.getElementById('d-stock').value = formatDot(data.Stock);
         
         document.getElementById('d-mname').innerText = data.Nama_ID || "MACHINE " + activeMachineID;
@@ -192,23 +196,19 @@
         const target = parseFloat(data[`Outlet_${userSelectedIdx}_Target`]) || 0;
         const aktual = parseFloat(data.Aktual) || 0;
         
-        // FIX: Input Target menggunakan format titik (.)
         if(activeEl !== 'i-target') document.getElementById('i-target').value = formatDot(target);
-        
         if(activeEl !== 'd-out-name') document.getElementById('d-out-name').value = data[`Outlet_${userSelectedIdx}_Nama`] || "";
         
-        // FIX: Tampilan Aktual menggunakan format titik (.)
         document.getElementById('d-aktual').innerText = formatDot(aktual);
-        
         document.getElementById('d-sysid').innerText = userSelectedIdx;
         const progress = target > 0 ? Math.min((aktual/target)*100, 100) : 0;
         
-        // FIX: Progress menggunakan format titik (.)
         document.getElementById('d-progress').innerText = formatDot(progress) + "%";
         document.getElementById('progress-bar').style.width = progress + "%";
     }
 
     async function postData(type, value = null) {
+        if (!userData) return;
         isUpdating = true; 
         let payload = { id_mesin: activeMachineID };
         const prefix = `Outlet_${userSelectedIdx}_`;
@@ -258,13 +258,16 @@
         fetchData();
     }
 
-    const machines = [{id:'1', name:'TH SMT'}, {id:'2', name:'TH P-01'}, {id:'3', name:'TH V-09'}, {id:'4', name:'TH P-05'}, {id:'5', name:'TH WF'}];
-    document.getElementById('machineList').innerHTML = machines.map(m => `<button onclick="changeMachine('${m.id}', this)" class="btn-machine flex-shrink-0 ${m.id === activeMachineID ? 'active' : ''}">${m.name}</button>`).join('');
+    // Hanya jalankan interval jika user valid
+    if (userData) {
+        const machines = [{id:'1', name:'TH SMT'}, {id:'2', name:'TH P-01'}, {id:'3', name:'TH V-09'}, {id:'4', name:'TH P-05'}, {id:'5', name:'TH WF'}];
+        document.getElementById('machineList').innerHTML = machines.map(m => `<button onclick="changeMachine('${m.id}', this)" class="btn-machine flex-shrink-0 ${m.id === activeMachineID ? 'active' : ''}">${m.name}</button>`).join('');
 
-    setInterval(fetchData, 1000);
-    setInterval(checkServerConnection, 10000);
-    fetchData();
-    checkServerConnection();
+        setInterval(fetchData, 1000);
+        setInterval(checkServerConnection, 10000);
+        fetchData();
+        checkServerConnection();
+    }
     </script>
 </body>
 </html>
