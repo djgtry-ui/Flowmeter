@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HMI Flowmeter Pro - Momentary Control</title>
+    <title>HMI Flowmeter Pro - Sequential Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -25,7 +25,6 @@
     <script>
         let userData = null;
         try { userData = JSON.parse(localStorage.getItem('user_data')); } catch(e) {}
-
         if (!localStorage.getItem('isLoggedIn')) { window.location.href = 'index.html'; }
 
         let idleTime = 0;
@@ -50,25 +49,25 @@
             <div class="flex items-center gap-3">
                 <div class="bg-blue-600 p-2 rounded-lg"><i class="fas fa-network-wired text-white"></i></div>
                 <div>
-                    <h1 class="text-xl font-extrabold text-white uppercase">Flowmeter <span class="text-blue-500">Control</span></h1>
-                    <p id="opName" class="text-[10px] text-slate-500 font-bold tracking-widest uppercase italic">Operator: Loading...</p>
+                    <h1 class="text-xl font-extrabold text-white">FLOWMETER <span class="text-blue-500">CONTROL</span></h1>
+                    <p id="opName" class="text-[10px] text-slate-500 font-bold uppercase italic tracking-widest">Operator: Loading...</p>
                 </div>
             </div>
             <div class="flex gap-2">
-                <a href="status_flowmeter.html" class="bg-blue-600 px-3 py-2 rounded text-[10px] font-bold text-white transition flex items-center gap-2 uppercase"><i class="fas fa-home"></i> Home</a>
-                <a href="history_flowmeter.html" class="bg-emerald-600 px-3 py-2 rounded text-[10px] font-bold text-white transition flex items-center gap-2 uppercase"><i class="fas fa-history"></i> History</a>
+                <a href="status_flowmeter.html" class="bg-indigo-600 px-3 py-2 rounded text-[10px] font-bold text-white uppercase"><i class="fas fa-home"></i> Home</a>
+                <a href="history_flowmeter.html" class="bg-emerald-600 px-3 py-2 rounded text-[10px] font-bold text-white uppercase"><i class="fas fa-history"></i> History</a>
             </div>
         </header>
 
         <div id="machineList" class="flex flex-wrap gap-2"></div>
 
         <div class="card-custom p-6 grid grid-cols-2 md:grid-cols-6 gap-6 border-l-4 border-blue-500 shadow-xl">
-            <div><p class="text-[10px] text-slate-500 font-black uppercase mb-1">No PO</p><div id="d-po" class="font-bold text-white text-sm">--</div></div>
-            <div><p class="text-[10px] text-slate-500 font-black uppercase mb-1">No PBI</p><div id="d-pbi" class="font-bold text-white text-sm">--</div></div>
-            <div><p class="text-[10px] text-slate-500 font-black uppercase mb-1">Material</p><div id="d-material" class="font-bold text-emerald-400 text-sm truncate">--</div></div>
-            <div><p class="text-[10px] text-slate-500 font-black uppercase mb-1">PIC</p><div id="d-pic" class="font-bold text-white text-sm">--</div></div>
-            <div><p class="text-[10px] text-slate-500 font-black uppercase mb-1">Stock</p><div id="d-stock" class="font-bold text-blue-400 text-sm">--</div></div>
-            <div><p class="text-[10px] text-slate-500 font-black uppercase mb-1">Machine</p><div id="d-mname" class="font-bold text-yellow-500 uppercase text-sm">--</div></div>
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">No PO</p><div id="d-po" class="font-bold text-white text-sm">--</div></div>
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">No PBI</p><div id="d-pbi" class="font-bold text-white text-sm">--</div></div>
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">Material</p><div id="d-material" class="font-bold text-emerald-400 text-sm truncate">--</div></div>
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">PIC</p><div id="d-pic" class="font-bold text-white text-sm">--</div></div>
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">Stock</p><div id="d-stock" class="font-bold text-blue-400 text-sm">--</div></div>
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">Machine</p><div id="d-mname" class="font-bold text-yellow-500 uppercase text-sm">--</div></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -104,17 +103,17 @@
                     <div class="flex justify-between"><span>System ID</span><span id="d-sysid" class="font-mono text-slate-300">--</span></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <button id="btn-start" onclick="control('START')" class="btn-ctrl bg-emerald-600 hover:bg-emerald-500 h-20 shadow-lg"><i class="fas fa-play mb-2 text-xl"></i> START</button>
-                    <button id="btn-stop" onclick="control('STOP')" class="btn-ctrl bg-amber-500 hover:bg-amber-400 h-20 shadow-lg"><i class="fas fa-stop mb-2 text-xl"></i> STOP</button>
-                    <button id="btn-reset" onclick="control('RESET')" class="btn-ctrl bg-rose-600 hover:bg-rose-500 h-20 shadow-lg"><i class="fas fa-undo mb-2 text-xl"></i> RESET</button>
-                    <button id="btn-master" onclick="control('MASTER_RESET')" class="btn-ctrl bg-red-950 hover:bg-red-900 h-20 text-[8px] shadow-lg"><i class="fas fa-power-off mb-2 text-xl text-red-500"></i> MASTER RESET</button>
+                    <button onclick="control('START')" class="btn-ctrl bg-emerald-600 hover:bg-emerald-500 h-20 shadow-lg"><i class="fas fa-play mb-2 text-xl"></i> START</button>
+                    <button onclick="control('STOP')" class="btn-ctrl bg-amber-500 hover:bg-amber-400 h-20 shadow-lg"><i class="fas fa-stop mb-2 text-xl"></i> STOP</button>
+                    <button onclick="control('RESET')" class="btn-ctrl bg-rose-600 hover:bg-rose-500 h-20 shadow-lg"><i class="fas fa-undo mb-2 text-xl"></i> RESET</button>
+                    <button onclick="control('MASTER_RESET')" class="btn-ctrl bg-red-950 hover:bg-red-900 h-20 text-[8px] shadow-lg"><i class="fas fa-power-off mb-2 text-xl text-red-500"></i> MASTER RESET</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. INITIALIZATION ---
+        // --- CONFIG ---
         const SHEET_ID = '141uuIOYNPmIYjI6OvCHRbMOOXrWtfFVfAisAis0zL-0';
         const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=result_flowmeter`;
         const PROXY_URL = "proxy_propan.php"; 
@@ -124,7 +123,6 @@
 
         if (userData) document.getElementById('opName').innerText = "Operator: " + userData.username.toUpperCase();
 
-        // --- 2. DATA FETCHING ---
         async function fetchData() {
             try {
                 const res = await fetch(`${CSV_URL}&t=${Date.now()}`);
@@ -176,23 +174,8 @@
             document.getElementById('progress-bar').style.width = progress + "%";
         }
 
-        // --- 3. MOMENTARY CONTROL LOGIC (KIRIM 1 -> JEDA -> KIRIM 0) ---
+        // --- SEQUENTIAL MOMENTARY CONTROL ---
         async function control(type, extraVal = null) {
-            let payloadOn = { id_mesin: activeMachineID };
-            let payloadOff = { id_mesin: activeMachineID };
-            
-            // Bypass untuk Update Target (Tidak momentary)
-            if (type === 'UPDATE_TARGET') {
-                payloadOn[`Outlet_${userSelectedIdx}_Target`] = extraVal;
-                await sendToProxy(payloadOn);
-                return;
-            }
-
-            // Set Sinyal Switch (Wajib 1 saat tekan)
-            payloadOn[`Outlet_${userSelectedIdx}_Switch`] = 1;
-            payloadOff[`Outlet_${userSelectedIdx}_Switch`] = 0;
-
-            // Mapping Tombol
             const cmdMap = {
                 'START': 'Start',
                 'STOP': 'Stop',
@@ -200,27 +183,40 @@
                 'MASTER_RESET': 'MstrReset'
             };
 
+            if (type === 'UPDATE_TARGET') {
+                await sendToProxy({ id_mesin: activeMachineID, [`Outlet_${userSelectedIdx}_Target`]: extraVal });
+                return;
+            }
+
+            const switchKey = `Outlet_${userSelectedIdx}_Switch`;
             const cmdKey = `Outlet_${userSelectedIdx}_${cmdMap[type]}`;
-            payloadOn[cmdKey] = 1;
-            payloadOff[cmdKey] = 0;
 
             try {
-                // KIRIM SINYAL HIGH (1)
-                console.log("Momentary HIGH:", payloadOn);
-                const res = await sendToProxy(payloadOn);
-                
-                if (res.ok) {
-                    // JEDA 1 DETIK LALU KIRIM SINYAL LOW (0)
+                // STEP 1: Kirim Switch HIGH (1)
+                console.log("Burst 1: Switch ON");
+                await sendToProxy({ id_mesin: activeMachineID, [switchKey]: 1 });
+
+                // Jeda 200ms agar PLC mengunci Switch
+                setTimeout(async () => {
+                    
+                    // STEP 2: Kirim Command HIGH (1)
+                    console.log(`Burst 2: ${type} ON`);
+                    await sendToProxy({ id_mesin: activeMachineID, [cmdKey]: 1 });
+
+                    // Durasi tekan (Master Reset lebih lama)
+                    const pulseTime = (type === 'MASTER_RESET') ? 2500 : 1200;
+
+                    // STEP 3: Reset All LOW (0)
                     setTimeout(async () => {
-                        console.log("Momentary LOW (Reset):", payloadOff);
-                        await sendToProxy(payloadOff);
-                        setTimeout(fetchData, 500);
-                    }, 1000);
-                } else {
-                    alert("Gagal mengirim perintah ke server!");
-                }
+                        console.log("Burst 3: All OFF (Auto-Reset)");
+                        await sendToProxy({ id_mesin: activeMachineID, [switchKey]: 0, [cmdKey]: 0 });
+                        setTimeout(fetchData, 800);
+                    }, pulseTime);
+
+                }, 200);
+
             } catch (e) {
-                alert("Koneksi ke proxy gagal!");
+                alert("Gagal terhubung ke Proxy!");
             }
         }
 
@@ -232,22 +228,13 @@
             });
         }
 
-        // --- 4. RENDER MACHINES ---
-        const machines = [
-            {id:'1', name:'TH SMT'}, {id:'2', name:'TH P-01'}, 
-            {id:'3', name:'TH V-09'}, {id:'4', name:'TH P-05'}, {id:'5', name:'TH WF'}
-        ];
-        
+        // --- INIT MACHINES ---
+        const machines = [{id:'1', name:'TH SMT'}, {id:'2', name:'TH P-01'}, {id:'3', name:'TH V-09'}, {id:'4', name:'TH P-05'}, {id:'5', name:'TH WF'}];
         machines.forEach(m => {
             const btn = document.createElement('button');
             btn.className = `btn-machine ${m.id === activeMachineID ? 'active' : ''}`;
             btn.innerText = m.name;
-            btn.onclick = () => { 
-                activeMachineID = m.id; 
-                document.querySelectorAll('.btn-machine').forEach(b => b.classList.remove('active')); 
-                btn.classList.add('active'); 
-                fetchData(); 
-            };
+            btn.onclick = () => { activeMachineID = m.id; document.querySelectorAll('.btn-machine').forEach(b => b.classList.remove('active')); btn.classList.add('active'); fetchData(); };
             document.getElementById('machineList').appendChild(btn);
         });
 
