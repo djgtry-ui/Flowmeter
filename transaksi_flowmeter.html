@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HMI Flowmeter Pro - Sequential Control</title>
+    <title>HMI Flowmeter - Final Sequential Logic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -23,24 +23,16 @@
 <body class="p-6">
 
     <script>
+        // SESSION & AUTO LOGOUT
         let userData = null;
         try { userData = JSON.parse(localStorage.getItem('user_data')); } catch(e) {}
         if (!localStorage.getItem('isLoggedIn')) { window.location.href = 'index.html'; }
 
         let idleTime = 0;
-        function resetTimer() { idleTime = 0; }
-        document.addEventListener('touchstart', resetTimer);
-        document.addEventListener('mousemove', resetTimer);
-        document.addEventListener('mousedown', resetTimer);
-        document.addEventListener('keypress', resetTimer);
-        document.addEventListener('scroll', resetTimer);
-
-        setInterval(function() {
+        document.addEventListener('mousedown', () => idleTime = 0);
+        setInterval(() => {
             idleTime++;
-            if (idleTime >= 60) { 
-                localStorage.clear();
-                window.location.href = 'index.html';
-            }
+            if (idleTime >= 60) { localStorage.clear(); window.location.href = 'index.html'; }
         }, 1000);
     </script>
 
@@ -49,25 +41,25 @@
             <div class="flex items-center gap-3">
                 <div class="bg-blue-600 p-2 rounded-lg"><i class="fas fa-network-wired text-white"></i></div>
                 <div>
-                    <h1 class="text-xl font-extrabold text-white">FLOWMETER <span class="text-blue-500">CONTROL</span></h1>
-                    <p id="opName" class="text-[10px] text-slate-500 font-bold uppercase italic tracking-widest">Operator: Loading...</p>
+                    <h1 class="text-xl font-extrabold text-white">FLOWMETER <span class="text-blue-500">PRO 2026</span></h1>
+                    <p id="opName" class="text-[10px] text-slate-500 font-bold uppercase italic">Operator: Loading...</p>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <a href="status_flowmeter.html" class="bg-indigo-600 px-3 py-2 rounded text-[10px] font-bold text-white uppercase"><i class="fas fa-home"></i> Home</a>
-                <a href="history_flowmeter.html" class="bg-emerald-600 px-3 py-2 rounded text-[10px] font-bold text-white uppercase"><i class="fas fa-history"></i> History</a>
+            <div class="flex gap-2 text-[10px] font-bold">
+                <a href="status_flowmeter.html" class="bg-indigo-600 px-3 py-2 rounded text-white uppercase"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="history_flowmeter.html" class="bg-emerald-600 px-3 py-2 rounded text-white uppercase"><i class="fas fa-history"></i> History</a>
             </div>
         </header>
 
         <div id="machineList" class="flex flex-wrap gap-2"></div>
 
-        <div class="card-custom p-6 grid grid-cols-2 md:grid-cols-6 gap-6 border-l-4 border-blue-500 shadow-xl">
-            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">No PO</p><div id="d-po" class="font-bold text-white text-sm">--</div></div>
-            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">No PBI</p><div id="d-pbi" class="font-bold text-white text-sm">--</div></div>
-            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">Material</p><div id="d-material" class="font-bold text-emerald-400 text-sm truncate">--</div></div>
-            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">PIC</p><div id="d-pic" class="font-bold text-white text-sm">--</div></div>
-            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">Stock</p><div id="d-stock" class="font-bold text-blue-400 text-sm">--</div></div>
-            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">Machine</p><div id="d-mname" class="font-bold text-yellow-500 uppercase text-sm">--</div></div>
+        <div class="card-custom p-6 grid grid-cols-2 md:grid-cols-6 gap-6 border-l-4 border-blue-500">
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">No PO</p><div id="d-po" class="text-white text-sm font-bold">--</div></div>
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">No PBI</p><div id="d-pbi" class="text-white text-sm font-bold">--</div></div>
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">Material</p><div id="d-material" class="text-emerald-400 text-sm font-bold truncate">--</div></div>
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">PIC</p><div id="d-pic" class="text-white text-sm font-bold">--</div></div>
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">Stock</p><div id="d-stock" class="text-blue-400 text-sm font-bold">--</div></div>
+            <div><p class="text-[10px] text-slate-500 font-black mb-1 uppercase">Machine</p><div id="d-mname" class="text-yellow-500 text-sm font-bold uppercase">--</div></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -80,18 +72,11 @@
                 <div class="grid grid-cols-2 gap-6">
                     <div class="card-custom p-6 text-center border-t-2 border-blue-500/20">
                         <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Target (Kg)</p>
-                        <input type="number" id="i-target" class="bg-transparent text-3xl font-black text-white val-mono text-center w-full focus:outline-none" value="0.00" onchange="control('UPDATE_TARGET', this.value)">
+                        <input type="number" id="i-target" class="bg-transparent text-3xl font-black text-white val-mono text-center w-full focus:outline-none" onchange="control('UPDATE_TARGET', this.value)">
                     </div>
                     <div class="card-custom p-6 text-center bg-emerald-500/5 border-t-2 border-emerald-500/20">
                         <p class="text-[10px] text-emerald-500/50 font-bold uppercase mb-2">Actual (Kg)</p>
                         <div id="d-aktual" class="text-3xl font-black text-emerald-500 val-mono">0.00</div>
-                    </div>
-                </div>
-
-                <div class="card-custom p-5">
-                    <div class="flex justify-between text-[10px] font-black mb-2 uppercase"><span>Filling Progress</span><span id="d-progress" class="text-emerald-500">0%</span></div>
-                    <div class="w-full bg-slate-900 rounded-full h-3 p-[2px]">
-                        <div id="progress-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-700 shadow-[0_0_10px_#10b981]" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
@@ -101,6 +86,7 @@
                     <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest border-b border-white/5 pb-2">Technical Info</p>
                     <div class="flex justify-between"><span>Jalur</span><span id="d-route" class="font-bold text-blue-400">--</span></div>
                     <div class="flex justify-between"><span>System ID</span><span id="d-sysid" class="font-mono text-slate-300">--</span></div>
+                    <div class="flex justify-between text-[10px]"><span>Status</span><span id="d-status-msg" class="text-yellow-500 italic font-bold">READY</span></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <button onclick="control('START')" class="btn-ctrl bg-emerald-600 hover:bg-emerald-500 h-20 shadow-lg"><i class="fas fa-play mb-2 text-xl"></i> START</button>
@@ -113,7 +99,6 @@
     </div>
 
     <script>
-        // --- CONFIG ---
         const SHEET_ID = '141uuIOYNPmIYjI6OvCHRbMOOXrWtfFVfAisAis0zL-0';
         const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=result_flowmeter`;
         const PROXY_URL = "proxy_propan.php"; 
@@ -122,6 +107,60 @@
         let userSelectedIdx = 1; 
 
         if (userData) document.getElementById('opName').innerText = "Operator: " + userData.username.toUpperCase();
+
+        // Helper function for delay
+        const sleep = ms => new Promise(res => setTimeout(res, ms));
+
+        async function sendToProxy(data) {
+            return fetch(PROXY_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        async function control(type, extraVal = null) {
+            const statusLabel = document.getElementById('d-status-msg');
+            const cmdMap = { 'START':'Start', 'STOP':'Stop', 'RESET':'Reset', 'MASTER_RESET':'MstrReset' };
+            
+            if (type === 'UPDATE_TARGET') {
+                await sendToProxy({ id_mesin: activeMachineID, [`Outlet_${userSelectedIdx}_Target`]: extraVal });
+                return;
+            }
+
+            const skey = `Outlet_${userSelectedIdx}_Switch`;
+            const ckey = `Outlet_${userSelectedIdx}_${cmdMap[type]}`;
+            const pulseTime = (type === 'MASTER_RESET') ? 3000 : 1500;
+
+            try {
+                statusLabel.innerText = "SWITCHING ON...";
+                // 1. Kirim Switch 1
+                await sendToProxy({ id_mesin: activeMachineID, [skey]: 1 });
+                await sleep(500);
+
+                statusLabel.innerText = type + " ACTIVE...";
+                // 2. Kirim Command 1
+                await sendToProxy({ id_mesin: activeMachineID, [ckey]: 1 });
+                await sleep(pulseTime);
+
+                statusLabel.innerText = "RELEASING...";
+                // 3. Kirim Command 0
+                await sendToProxy({ id_mesin: activeMachineID, [ckey]: 0 });
+                await sleep(400);
+
+                statusLabel.innerText = "CLOSING SWITCH...";
+                // 4. Kirim Switch 0
+                await sendToProxy({ id_mesin: activeMachineID, [skey]: 0 });
+                
+                statusLabel.innerText = "DONE";
+                setTimeout(() => statusLabel.innerText = "READY", 2000);
+                setTimeout(fetchData, 500);
+
+            } catch (e) {
+                statusLabel.innerText = "ERROR";
+                console.error(e);
+            }
+        }
 
         async function fetchData() {
             try {
@@ -132,7 +171,7 @@
                 });
                 const data = rows.find(r => r[1] === activeMachineID);
                 if (data) renderUI(data);
-            } catch (e) { console.log("Sync error"); }
+            } catch (e) { console.log("Fetch Error"); }
         }
 
         function renderUI(data) {
@@ -162,84 +201,31 @@
             const selBaseIdx = 15 + ((userSelectedIdx - 1) * 9);
             const targetVal = parseFloat(data[selBaseIdx + 1]?.replace(',', '.') || 0);
             const aktual = parseFloat(data[12]?.replace(',', '.') || 0);
-            const progress = targetVal > 0 ? Math.min((aktual/targetVal)*100, 100) : 0;
-
             if (document.activeElement !== document.getElementById('i-target')) {
                 document.getElementById('i-target').value = targetVal.toFixed(2);
             }
             document.getElementById('d-aktual').innerText = aktual.toFixed(2);
             document.getElementById('d-route').innerText = data[selBaseIdx] || "--";
             document.getElementById('d-sysid').innerText = userSelectedIdx;
-            document.getElementById('d-progress').innerText = progress.toFixed(1) + "%";
-            document.getElementById('progress-bar').style.width = progress + "%";
         }
 
-        // --- SEQUENTIAL MOMENTARY CONTROL ---
-        async function control(type, extraVal = null) {
-            const cmdMap = {
-                'START': 'Start',
-                'STOP': 'Stop',
-                'RESET': 'Reset',
-                'MASTER_RESET': 'MstrReset'
-            };
-
-            if (type === 'UPDATE_TARGET') {
-                await sendToProxy({ id_mesin: activeMachineID, [`Outlet_${userSelectedIdx}_Target`]: extraVal });
-                return;
-            }
-
-            const switchKey = `Outlet_${userSelectedIdx}_Switch`;
-            const cmdKey = `Outlet_${userSelectedIdx}_${cmdMap[type]}`;
-
-            try {
-                // STEP 1: Kirim Switch HIGH (1)
-                console.log("Burst 1: Switch ON");
-                await sendToProxy({ id_mesin: activeMachineID, [switchKey]: 1 });
-
-                // Jeda 200ms agar PLC mengunci Switch
-                setTimeout(async () => {
-                    
-                    // STEP 2: Kirim Command HIGH (1)
-                    console.log(`Burst 2: ${type} ON`);
-                    await sendToProxy({ id_mesin: activeMachineID, [cmdKey]: 1 });
-
-                    // Durasi tekan (Master Reset lebih lama)
-                    const pulseTime = (type === 'MASTER_RESET') ? 2500 : 1200;
-
-                    // STEP 3: Reset All LOW (0)
-                    setTimeout(async () => {
-                        console.log("Burst 3: All OFF (Auto-Reset)");
-                        await sendToProxy({ id_mesin: activeMachineID, [switchKey]: 0, [cmdKey]: 0 });
-                        setTimeout(fetchData, 800);
-                    }, pulseTime);
-
-                }, 200);
-
-            } catch (e) {
-                alert("Gagal terhubung ke Proxy!");
-            }
-        }
-
-        async function sendToProxy(data) {
-            return fetch(PROXY_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-        }
-
-        // --- INIT MACHINES ---
+        // INIT MACHINES
         const machines = [{id:'1', name:'TH SMT'}, {id:'2', name:'TH P-01'}, {id:'3', name:'TH V-09'}, {id:'4', name:'TH P-05'}, {id:'5', name:'TH WF'}];
         machines.forEach(m => {
             const btn = document.createElement('button');
             btn.className = `btn-machine ${m.id === activeMachineID ? 'active' : ''}`;
             btn.innerText = m.name;
-            btn.onclick = () => { activeMachineID = m.id; document.querySelectorAll('.btn-machine').forEach(b => b.classList.remove('active')); btn.classList.add('active'); fetchData(); };
+            btn.onclick = () => { 
+                activeMachineID = m.id; 
+                document.querySelectorAll('.btn-machine').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active'); 
+                fetchData(); 
+            };
             document.getElementById('machineList').appendChild(btn);
         });
 
         fetchData();
-        setInterval(fetchData, 3000);
+        setInterval(fetchData, 4000);
     </script>
 </body>
 </html>
